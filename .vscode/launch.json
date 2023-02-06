@@ -20,6 +20,7 @@
                 }
             },
             "args": [],
+            "sourceMap": {"/mnt/sdb1/125_files/source/mek_calculator":"${workspaceFolder}"},
             "cwd": "${workspaceFolder}"
         },
         {
