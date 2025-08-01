@@ -25,7 +25,7 @@ pub struct BoilerLayout {
     height: i64,
     heating_mode: HeatingMode,
     heat_capacity: f64,
-    spliter_layer: i64,
+    splitter_layer: i64,
     heating_element: i64,
 }
 impl BoilerLayout {
@@ -39,12 +39,12 @@ impl BoilerLayout {
             height,
             heating_mode,
             heat_capacity,
-            spliter_layer: 0,
+            splitter_layer: 0,
             heating_element: 0,
         }
     }
-    pub fn get_spliter_layer(&self) -> i64 {
-        self.spliter_layer
+    pub fn get_splitter_layer(&self) -> i64 {
+        self.splitter_layer
     }
     pub fn get_heating_element(&self) -> i64 {
         self.heating_element
@@ -55,9 +55,9 @@ impl BoilerLayout {
     }
     pub fn get_water_tank(&self) -> i64 {
         let area = self.get_area();
-        let spliter = self.spliter_layer;
+        let splitter = self.splitter_layer;
         let heater = self.heating_element;
-        ((spliter - 1) * area - heater) * WATER_TANK_VOLUME
+        ((splitter - 1) * area - heater) * WATER_TANK_VOLUME
     }
     pub fn get_heat_rate(&self) -> i64 {
         let heater = self.heating_element;
@@ -66,8 +66,8 @@ impl BoilerLayout {
     pub fn get_steam_tank(&self) -> i64 {
         let area = self.get_area();
         let height = self.height;
-        let spliter = self.spliter_layer;
-        (height - spliter) * area * STEAM_TANK_VOLUME
+        let splitter = self.splitter_layer;
+        (height - splitter) * area * STEAM_TANK_VOLUME
     }
     pub fn get_production(&self) -> i64 {
         min_tri(
@@ -106,30 +106,22 @@ impl BoilerLayout {
             HeatingMode::SodiumHeating => self.get_coolant_consumption(),
         }
     }
-    fn get_max_spliter_layer(&self) -> i64 {
+    fn get_max_splitter_layer(&self) -> i64 {
         self.height - CASING_THICKNESS
     }
     fn get_max_heating_element(&self) -> i64 {
         let inner_area = (self.length - CASING_THICKNESS) * (self.width - CASING_THICKNESS);
-        let height = self.spliter_layer - CASING_THICKNESS;
+        let height = self.splitter_layer - CASING_THICKNESS;
         inner_area * height
     }
     fn calculate_layout(mut self) -> BoilerLayout {
         let mut max_value = 0;
         let mut best_layout = BoilerLayout::default();
-        for i in CASING_THICKNESS..self.get_max_spliter_layer() {
-            self.spliter_layer = i;
+        for i in CASING_THICKNESS..self.get_max_splitter_layer() {
+            self.splitter_layer = i;
             for j in 0..self.get_max_heating_element() {
                 self.heating_element = j;
                 let current_value = self.get_value();
-                // if j == 5 {
-                //     println!("{}", current_value);
-                //     println!("{:?}", self);
-                //     println!("{}", self.get_max_temperature());
-                //     println!("{:?}", best_layout);
-                //     println!("{}", best_layout.get_max_temperature());
-                //     panic!();
-                // }
 
                 if max_value < current_value {
                     best_layout = self.clone();

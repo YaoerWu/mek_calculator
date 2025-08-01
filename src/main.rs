@@ -99,7 +99,7 @@ fn main() {
                     _ => return,
                 },
             );
-            println!("Separator element height: {}", layout.get_spliter_layer());
+            println!("Separator element height: {}", layout.get_splitter_layer());
             println!("Total heating elements: {}", layout.get_heating_element());
             println!("Maximum steam output: {}", layout.get_production());
             if user_selection == 1 {

@@ -46,8 +46,8 @@ impl FissionFuelAssemblyLayout {
         }
     }
 
-    fn get_valid_assembly(&self, postion: (i64, i64)) -> i64 {
-        let (x, y) = postion;
+    fn get_valid_assembly(&self, position: (i64, i64)) -> i64 {
+        let (x, y) = position;
         if x >= self.length || y >= self.width {
             return 0;
         }
@@ -56,14 +56,14 @@ impl FissionFuelAssemblyLayout {
         }
         self.layout[x as usize][y as usize]
     }
-    fn check_fuel_rod(&self, postion: (i64, i64)) -> bool {
-        self.get_valid_assembly(postion) > 0
+    fn check_fuel_rod(&self, position: (i64, i64)) -> bool {
+        self.get_valid_assembly(position) > 0
     }
-    fn get_fuel_rod_value(&self, postion: (i64, i64)) -> i64 {
-        if !self.check_fuel_rod(postion) {
+    fn get_fuel_rod_value(&self, position: (i64, i64)) -> i64 {
+        if !self.check_fuel_rod(position) {
             return 0;
         }
-        let (x, y) = postion;
+        let (x, y) = position;
         let mut value = 0;
         if self.check_fuel_rod((x - 1, y)) {
             value += 1;
@@ -122,8 +122,8 @@ impl FissionFuelAssemblyLayout {
     }
     pub fn get_assembly_count(&self) -> i64 {
         let mut count = 0;
-        for cow in self.layout.iter() {
-            for i in cow.iter() {
+        for row in self.layout.iter() {
+            for i in row.iter() {
                 if *i > 0 {
                     count += *i;
                 }
@@ -132,8 +132,8 @@ impl FissionFuelAssemblyLayout {
         count
     }
 
-    fn get_fuel_rod_surface(&self, postion: (i64, i64)) -> i64 {
-        if !self.check_fuel_rod(postion) {
+    fn get_fuel_rod_surface(&self, position: (i64, i64)) -> i64 {
+        if !self.check_fuel_rod(position) {
             return 0;
         }
         let clamp = |x| {
@@ -143,8 +143,8 @@ impl FissionFuelAssemblyLayout {
                 x
             }
         };
-        let self_count = self.get_valid_assembly(postion);
-        let (x, y) = postion;
+        let self_count = self.get_valid_assembly(position);
+        let (x, y) = position;
         let left = self_count - self.get_valid_assembly((x - 1, y));
         let right = self_count - self.get_valid_assembly((x + 1, y));
         let up = self_count - self.get_valid_assembly((x, y + 1));
