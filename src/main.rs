@@ -11,34 +11,34 @@ fn main() {
     let mut height;
     loop {
         length = Input::<String>::new()
-            .with_prompt("输入长度")
+            .with_prompt("Enter length")
             .interact_text()
             .unwrap()
             .parse()
             .unwrap();
         width = Input::<String>::new()
-            .with_prompt("输入宽度")
+            .with_prompt("Enter width")
             .interact_text()
             .unwrap()
             .parse()
             .unwrap();
         height = Input::<String>::new()
-            .with_prompt("输入高度")
+            .with_prompt("Enter height")
             .interact_text()
             .unwrap()
             .parse()
             .unwrap();
 
         if !check_attributes(length, width, height) {
-            println!("指定的尺寸无法构成多方块结构");
+            println!("The specified dimensions cannot form a multiblock structure");
         } else {
             break;
         }
     }
 
-    let items = vec!["裂变反应堆", "锅炉"];
+    let items = vec!["Fission Reactor", "Boiler"];
     let user_selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("选择计算器模式:")
+        .with_prompt("Select calculator mode:")
         .items(&items)
         .default(0)
         .interact_on_opt(&Term::stderr())
@@ -46,9 +46,9 @@ fn main() {
         .unwrap();
     match user_selection {
         0 => {
-            let items = vec!["水冷", "钠冷"];
+            let items = vec!["Water Cooling", "Sodium Cooling"];
             let user_selection = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt("选择反应堆冷却模式:")
+                .with_prompt("Select reactor cooling mode:")
                 .items(&items)
                 .default(0)
                 .interact_on_opt(&Term::stderr())
@@ -64,14 +64,14 @@ fn main() {
                     _ => return,
                 },
             );
-            println!("反应堆燃料棒排布:");
+            println!("Reactor fuel rod layout:");
             println!("{}", layout);
-            println!("燃料表面积: {}", layout.get_total_surface());
-            println!("沸腾效率: {}", layout.get_efficiency());
-            println!("燃料棒总数: {}", layout.get_assembly_count());
-            println!("最大燃烧速率: {}", layout.get_max_speed());
+            println!("Fuel surface area: {}", layout.get_total_surface());
+            println!("Boiling efficiency: {}", layout.get_efficiency());
+            println!("Total fuel rods: {}", layout.get_assembly_count());
+            println!("Maximum burn rate: {}", layout.get_max_speed());
             println!(
-                "最大冷却剂消耗速率: {}",
+                "Maximum coolant consumption rate: {}",
                 layout.get_max_speed()
                     * match user_selection {
                         0 => 20_000_f64,
@@ -81,9 +81,9 @@ fn main() {
             );
         }
         1 => {
-            let items = vec!["直接加热", "钠冷加热"];
+            let items = vec!["Direct Heating", "Sodium Heating"];
             let user_selection = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt("选择锅炉加热方式:")
+                .with_prompt("Select boiler heating method:")
                 .items(&items)
                 .default(0)
                 .interact_on_opt(&Term::stderr())
@@ -99,11 +99,11 @@ fn main() {
                     _ => return,
                 },
             );
-            println!("分压元件高度:{}", layout.get_spliter_layer());
-            println!("发热元件总数:{}", layout.get_heating_element());
-            println!("最大蒸汽产出:{}", layout.get_production());
+            println!("Separator element height: {}", layout.get_spliter_layer());
+            println!("Total heating elements: {}", layout.get_heating_element());
+            println!("Maximum steam output: {}", layout.get_production());
             if user_selection == 1 {
-                println!("最大过热钠消耗:{}", layout.get_coolant_consumption());
+                println!("Maximum superheated sodium consumption: {}", layout.get_coolant_consumption());
             }
         }
         _ => (),

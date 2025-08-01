@@ -1,85 +1,90 @@
-# mek反应堆与锅炉属性计算器
-## 功能：
-* 指定反应堆大小与冷却模式，计算反应堆最大燃烧速率与最优燃料棒排布方式
-* 指定锅炉大小与加热模式，计算锅炉最大产出效率与最优建造方式
-## 使用方法
-1. 输入长宽高
-2. 选择计算对象
-3. 选择冷却模式/加热模式
-## 注意：
-* 锅炉的分压原件高度中包括外壳的高度，如高度为2时，与底部接触。 
-* 两种计算中都未纳入环境散热影响
-* 反应堆燃烧速率与冷却剂消耗：（因环境散热导致略小）
-    * 水：烧1产20 000
-    * 钠：烧1产200 000
-# 原理
-## 反应堆每tick做的事：
-1. 如果激活了，就烧燃料
+# MEK Reactor and Boiler Properties Calculator
+## Features:
+* Specify reactor size and cooling mode to calculate maximum burn rate and optimal fuel rod layout
+* Specify boiler size and heating mode to calculate maximum output efficiency and optimal construction method
+## Usage
+1. Input length, width, and height
+2. Select calculation target
+3. Select cooling mode/heating mode
+## Notes:
+* The boiler's separator element height includes the casing height. When height is 2, it contacts the bottom.
+* Both calculations do not account for environmental heat dissipation
+* Reactor burn rate and coolant consumption: (slightly lower due to environmental heat dissipation)
+    * Water: burn 1 produces 20,000
+    * Sodium: burn 1 produces 200,000
+# Principles
+## What the reactor does each tick:
+1. If activated, burn fuel
 
-        燃烧速率、剩余燃料、（燃料棒数量*每个燃料棒的速率限制）取最小值烧掉燃料
-            默认每个燃料棒的速率限制为1
-        烧掉的燃料*每单位燃料产生的热量 添加到热容
-            默认每单位燃料产生的热量为1 000 000
-        烧掉的燃料与废水箱已存废料相加>0则爆仓，否则相加后存到废料箱
-            爆仓只会爆辐射出来，不会炸
+        Burn rate = min(burn rate, remaining fuel, (fuel rod count * rate limit per fuel rod))
+            Default rate limit per fuel rod is 1
+        Heat added to heat capacity = burned fuel * heat generated per unit fuel
+            Default heat generated per unit fuel is 1,000,000
+        If burned fuel + existing waste > waste tank capacity, overflow occurs (radiation leak, no explosion)
         
-2. 处理冷却剂
+2. Process coolant
 
-        有效热量=沸腾效率*(当前温度-沸腾温度)*热容
-        当前温度=热容热量/热容
-            热容=外壳方块数 * 1 000=(长宽高-(长-2)(宽-2)(高-2)) * 1 000
-            沸腾效率=min(1,燃料组件表面积/燃料组件数/4)
-            沸腾温度=373.15K
-        有效散热=冷却剂热导率(水0.5 钠蒸汽1)*有效热量
-            水冷却剂加热速率=蒸汽效率(0.2)*有效散热/蒸汽热焓(默认10)
-            气体冷却剂加热速率=有效散热/冷却剂热焓(钠蒸汽5)
-        从热容热量中减掉有效散热
-3. 模拟环境降温
+        Effective heat = boiling efficiency * (current temperature - boiling temperature) * heat capacity
+        Current temperature = heat capacity heat / heat capacity
+            Heat capacity = casing blocks * 1,000 = (length*width*height - (length-2)*(width-2)*(height-2)) * 1,000
+            Boiling efficiency = min(1, fuel assembly surface area / fuel assembly count / 4)
+            Boiling temperature = 373.15K
+        Effective heat dissipation = coolant thermal conductivity * effective heat
+            Water coolant: thermal conductivity 0.5, steam efficiency 0.2
+            Gas coolant: thermal conductivity varies (sodium steam 1)
+        Subtract effective heat dissipation from heat capacity
 
-        降温系数=空气系数+隔热系数+导热系数
-            空气系数为 10 000
-            隔热系数为 10 000
-            导热系数为 10
-        降温温度=(热容温度-环境温度)/降温系数
-            环境温度为 300+25*(平均温度系数-0.8)
-            平均温度系数为多方块结构8个角的方块温度系数的平均值
-            温度系数取值[ -5,5 ],平原时为0.8
-        环境散热=降温温度*热容
-        从热容热量中减掉环境散热
-4. 更新热量
-5. 处理反应堆损伤
-6. 处理辐射
+3. Simulate environmental cooling
 
-## 锅炉每tick做的事：
+        Cooling coefficient = air coefficient + insulation coefficient + thermal conductivity
+            Air coefficient = 10,000
+            Insulation coefficient = 10,000  
+            Thermal conductivity = 10
+        Cooling temperature = (heat capacity temperature - environment temperature) / cooling coefficient
+            Environment temperature = 300 + 25 * (average temperature coefficient - 0.8)
+            Average temperature coefficient = average of temperature coefficients at 8 corners of multiblock
+            Temperature coefficient range [-5, 5], plains = 0.8
+        Environmental heat dissipation = cooling temperature * heat capacity
+        Subtract environmental heat dissipation from heat capacity
 
-1. 环境散热
+4. Update heat
+5. Process reactor damage  
+6. Process radiation
+
+## What the boiler does each tick:
+
+1. Environmental heat dissipation
    
-        同反应堆
-2. 更新热量
-3. （如果有）消耗过热钠变成热量
+        Same as reactor
+
+2. Update heat
+
+3. (If applicable) Consume superheated sodium and convert to heat
    
-        过热钠消耗=min(过热钠储量 * 冷却系数(0.4) * (1-锅炉温度/冷却剂温度(100 000)),冷却的钠蒸汽距离满仓的量)
-        增加热量=过热钠消耗*钠的焓(5)
-4. 消耗热量烧水
+        Superheated sodium consumption = min(superheated sodium storage * cooling coefficient (0.4) * (1 - boiler temperature / coolant temperature (100,000)), remaining cooled sodium steam capacity)
+        Heat increase = superheated sodium consumption * sodium enthalpy (5)
+
+4. Consume heat to boil water
    
-        烧水热量=(当前温度-沸腾温度) * 锅炉热容 * 锅炉水导热率
-            锅炉水导热率默认为0.7
-        有效热量=min(烧水热量,加热元件*加热元件导热率)
-            加热元件导热率默认为160 000 000
-        烧水量=min(蒸汽效率(0.2)*有效热量/蒸汽热焓(10),水箱的水,蒸汽箱剩余容量)
-            水箱容量=分压原件以下（不含）的体积（包括外壳）* 16 000
-            蒸汽容量=分压原件以上（含）的体积（包括外壳）* 160 000
-        减少热量=烧水量*蒸汽热焓(10)/蒸汽效率(0.2)
+        Water boiling heat = (current temperature - boiling temperature) * boiler heat capacity * boiler water thermal conductivity
+            Boiler water thermal conductivity default = 0.7
+        Effective heat = min(water boiling heat, heating elements * heating element thermal conductivity)
+            Heating element thermal conductivity default = 160,000,000
+        Steam production = min(steam efficiency (0.2) * effective heat / steam enthalpy (10), water tank water, steam tank remaining capacity)
+            Water tank capacity = volume below separator (excluding) * 16,000
+            Steam capacity = volume above separator (including) * 160,000
+        Heat reduction = steam production * steam enthalpy (10) / steam efficiency (0.2)
         
-### 锅炉的加热方式
+### Boiler heating modes
 
-1. 直接加热模式：
+1. Direct heating mode:
 
-        最大烧水量=min(加热元件加热率/320 000,水箱容量,蒸汽容量)
-1. 钠冷加热模式：
+        Maximum steam production = min(heating element heating rate / 320,000, water tank capacity, steam capacity)
 
-        消耗钠导致的热量增加>=烧水导致的热量减少+环境散热（可忽略）
-        设烧水导致的热量减少=烧水热量且钠蒸汽不会满箱
-        得温度T=最大烧水量/热容*71.4285
-        得热量消耗=最大烧水量*50
-        得过热钠最大消耗量=min(过热钠储量 * 冷却系数(0.4) * (1-锅炉温度/冷却剂温度(100 000)),冷却的钠蒸汽距离满仓的量,最大烧水量*10)
+2. Sodium cooling heating mode:
+
+        Heat increase from sodium consumption >= heat decrease from water boiling + environmental heat dissipation (negligible)
+        Assuming heat decrease from water boiling = water boiling heat and sodium steam won't overflow
+        Temperature T = maximum steam production / heat capacity * 71.4285
+        Heat consumption = maximum steam production * 50
+        Maximum superheated sodium consumption = min(superheated sodium storage * cooling coefficient (0.4) * (1 - boiler temperature / coolant temperature (100,000)), remaining cooled sodium steam capacity, maximum steam production * 10)
